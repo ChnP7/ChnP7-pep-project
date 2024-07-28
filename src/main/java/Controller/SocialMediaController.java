@@ -23,6 +23,7 @@ public class SocialMediaController {
         Javalin app = Javalin.create();
         //app.get("localhost:8080", this::exampleHandler);
         app.post("/register", this::registrationHandler);
+        app.post("/login", this::loginHandler);
 
         return app;
     }
@@ -35,6 +36,10 @@ public class SocialMediaController {
         context.json("sample text");
     }
 
+    /**
+     * Handles registration requests
+     * @param context context
+     */
     private void registrationHandler(Context context) {
         ObjectMapper om = new ObjectMapper();
         String json = context.body();
@@ -43,7 +48,6 @@ public class SocialMediaController {
             UserService service = new UserService();
             Account result = service.addAccount(account);
             if (result == null) {
-                System.out.println("HERE");
                 context.status(400);
             }
             else {
@@ -57,6 +61,30 @@ public class SocialMediaController {
             System.out.println(e.getLocalizedMessage());
         }
         
+    }
+
+    /**
+     * Handles login requests
+     * @param context context
+     */
+    private void loginHandler(Context context) {
+        ObjectMapper om = new ObjectMapper();
+        String json = context.body();
+        try {
+            Account account = om.readValue(json, Account.class);
+            UserService service = new UserService();
+            Account result = service.getAccount(account);
+            if (result == null) {
+                context.status(401);
+            }
+            else {
+                context.status(200);
+                context.json(result);
+            }
+        }
+        catch(JsonProcessingException e) {
+            System.out.println(e.getLocalizedMessage());
+        }
     }
 
 

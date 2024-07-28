@@ -61,5 +61,15 @@ public class UserService {
         List<Account> accounts = dao.getAllAccounts();
         return accounts;
     }
+
+    /**
+     * Gets a specific account by username and password
+     * @param account Account object with username and password to find
+     * @return An account object that was found, or null if not found.
+     */
+    public Account getAccount(Account account) {
+        Account result = dao.getAccount(account);
+        return result;
+    }
     
 }

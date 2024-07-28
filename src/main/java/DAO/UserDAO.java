@@ -59,6 +59,36 @@ public class UserDAO {
     }
 
     /**
+     * Gets an account by username and password
+     * @param account account object containing username and password 
+     * @return an account object representing the found account, or null if not found
+     */
+    public Account getAccount(Account account) {
+        String username = account.getUsername();
+        String password = account.getPassword();
+
+        try {
+            Connection connection = ConnectionUtil.getConnection();
+            String sql = "SELECT * FROM Account WHERE username = ? AND password = ?;";
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, username);
+            statement.setString(2, password);
+
+            ResultSet results = statement.executeQuery();
+            if (results.next()) {
+                Account foundAccount = new Account(
+                    results.getInt(id), results.getString(this.username), results.getString(this.password)
+                );
+                return foundAccount;
+            }
+        }
+        catch(SQLException e) {
+            System.out.println(e.getLocalizedMessage());
+        }
+        return null;
+    }
+
+    /**
      * Creates (adds) a new account to the Social Media Platform. 
      * Returns an Account object representing the newly-added account having
      * a newly-generated id. 
