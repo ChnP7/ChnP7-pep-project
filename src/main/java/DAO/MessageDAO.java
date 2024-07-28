@@ -141,7 +141,7 @@ public class MessageDAO {
      */
     public Message addMessage(Message message) {
         Message newMsg = null;
-
+        System.out.println("Yes");
         try {
             Connection connection = ConnectionUtil.getConnection();
             String sql = "INSERT INTO Message (" + posted_by + ", " + message_text + ", " + time_posted_epoch + 
@@ -155,18 +155,16 @@ public class MessageDAO {
             ResultSet results = statement.getGeneratedKeys();
             if (results.next()) {
                 int msgId = (int)results.getLong(message_id);
-                int postedBy = (int)results.getLong(posted_by);
-                String msgText = results.getString(message_text);
-                long timePosted = results.getLong(time_posted_epoch);
 
                 newMsg = new Message(
-                    msgId, postedBy, msgText, timePosted
+                    msgId, message.getPosted_by(), message.getMessage_text(), message.getTime_posted_epoch()
                 );
 
             }
         }
         catch(SQLException e) {
             System.out.println(e.getLocalizedMessage());
+            e.printStackTrace();
         }
 
         return newMsg;
@@ -178,25 +176,18 @@ public class MessageDAO {
      * @return the now-deleted message if found, null if not found.
      */
     public Message DeleteMessage(int id) {
-        Message message = null;
+        Message message = getMessage(id);
+        if (message == null) {
+            return null;
+        }
         try {
             Connection connection = ConnectionUtil.getConnection();
             String sql = "DELETE FROM Message WHERE " + message_id + " = ?;";
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setInt(1, id);
-            statement.executeUpdate();
-
-            ResultSet results = statement.getResultSet();
-
-            if (results.next()) {
-                int msgId = (int)results.getLong(message_id);
-                int postedBy = (int)results.getLong(posted_by);
-                String msgText = results.getString(message_text);
-                long timePosted = results.getLong(time_posted_epoch);
-
-                message = new Message(
-                    msgId, postedBy, msgText, timePosted
-                );
+            int affected = statement.executeUpdate();
+            if (affected == 0) {
+                return null;
             }
 
         }
@@ -214,7 +205,10 @@ public class MessageDAO {
      * @return the updated message if found, null if not found.
      */
     public Message updateMessage(int id, String text) {
-        Message message = null;
+        Message message = getMessage(id);
+        if (message == null) {
+            return null;
+        }
         try {
             Connection connection = ConnectionUtil.getConnection();
             String sql = "UPDATE Message SET " + message_text + " = ? " + 
@@ -222,20 +216,13 @@ public class MessageDAO {
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setString(1, text);
             statement.setInt(2, id);
-            statement.executeUpdate();
-
-            ResultSet results = statement.getResultSet();
-
-            if (results.next()) {
-                int msgId = (int)results.getLong(message_id);
-                int postedBy = (int)results.getLong(posted_by);
-                String msgText = results.getString(message_text);
-                long timePosted = results.getLong(time_posted_epoch);
-
-                message = new Message(
-                    msgId, postedBy, msgText, timePosted
-                );
+            if (statement.executeUpdate() == 0) {
+                return null;
             }
+
+            return new Message(
+                message.getMessage_id(), message.getPosted_by(), text, message.getTime_posted_epoch()
+            );
 
         }
         catch (SQLException e) {
