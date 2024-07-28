@@ -9,7 +9,7 @@ import Util.ConnectionUtil;
 
 /**
  * Represents the DAO Layer for a message on the Social Media Platform
- * Singleton
+ * Singleton Class
  */
 public class MessageDAO {
 
